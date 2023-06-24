@@ -4,7 +4,6 @@
     <input
       class="btn"
       :class="inputClass"
-      type="text"
       :value="value"
       @input="updateValue"
       v-bind="$attrs"

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div role="button">
     <button
       v-on="$listeners"
       class="button"
@@ -13,6 +13,7 @@
 
 <script>
 export default {
+  name: 'BaseInput',
   inheritAttrs: false,
   props: {
     buttonClass: {
@@ -23,4 +24,7 @@ export default {
 </script>
 
 <style scoped>
+.button {
+  border: none
+}
 </style>
