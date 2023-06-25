@@ -1,24 +1,72 @@
 <template>
   <div class="canvas">
-    <div class="canvas__outer-circle">
-      <div class="canvas__inner-circle">
+    <div 
+      class="canvas__outer-circle" 
+      :style="{ backgroundColor: canvasBackgroundColor }"
+      @drop.stop="onDrop"
+      @dragover.prevent
+      @dragenter.prevent
+    >
+      <div class="canvas__inner-circle" :style="{ backgroundColor: canvasBackgroundColor }">
         <div class="canvas__star-container">
-          <span class="canvas__star canvas__star--sm"></span>
-          <span class="canvas__star canvas__star--md"></span>
-          <span class="canvas__star canvas__star--sm"></span>
+          <span 
+            class="canvas__star canvas__star--sm cursor-move"
+            draggable
+            @dragstart.self="onDrag"
+            @dragover.prevent
+            @dragenter.prevent
+          >
+          </span>
+          <span 
+            class="canvas__star canvas__star--md cursor-move"
+            draggable
+            @dragstart.self="onDrag"
+            @dragover.prevent
+            @dragenter.prevent  
+          >
+          </span>
+          <span 
+            class="canvas__star canvas__star--sm cursor-move"
+            draggable
+            @dragstart.self="onDrag"
+            @dragover.prevent
+            @dragenter.prevent  
+          >
+          </span>
         </div>
         <div class="canvas__inner-circle-content">
           <div class="canvas__text-container">
-            <p class="canvas__text">All the text and elements in this popup should be editable and dragable</p>
+            <BaseDrop @drop="moveItemInCanvas">
+              <BaseDrag>
+                <p class="canvas__text">All the text and elements in this popup should be editable and dragable</p>
+              </BaseDrag>
+            </BaseDrop>
           </div>
-          <BaseInput placeholder="E-mail" inputClass="canvas__input" />
-          <BaseButton 
-            buttonClass="canvas__button"
-          >
-            signup now
-          </BaseButton>
+
+          <BaseDrop @drop="moveItemInCanvas">
+            <BaseDrag>
+              <BaseInput placeholder="E-mail" inputClass="canvas__input" />
+            </BaseDrag>
+          </BaseDrop>
+
+
+          <BaseDrop @drop="moveItemInCanvas">
+            <BaseDrag>
+              <BaseButton 
+                buttonClass="canvas__button"
+                :buttonBackgroundColor="buttonBackgroundColor"
+              >
+                signup now
+              </BaseButton>            
+            </BaseDrag>
+          </BaseDrop>
+         
           <div class="canvas__text-container">
-            <p class="canvas__mini-text">No credit card required. No surprises</p>
+            <BaseDrop @drop="moveItemInCanvas">
+              <BaseDrag>
+                <p class="canvas__mini-text">No credit card required. No surprises</p>         
+              </BaseDrag>
+            </BaseDrop>
           </div>
         </div>
       </div>
@@ -29,10 +77,35 @@
 <script>
   import BaseInput from '@/components/BaseInput'
   import BaseButton from '@/components/BaseButton'
+  import BaseDrag from '@/components/BaseDrag.vue';
+  import BaseDrop from '@/components//BaseDrop.vue';
   export default {
     components: {
       BaseInput,
-      BaseButton
+      BaseButton,
+      BaseDrag,
+      BaseDrop
+    },
+    props: {
+      buttonBackgroundColor: {
+        type: String,
+        default: '#000'
+      },
+      canvasBackgroundColor: {
+        type: String,
+        default: '#E85E5B'
+      }
+    },
+    methods: {
+      onDrag() {
+
+      },
+      moveItemInCanvas() {
+
+      },
+      onDrop() {
+        
+      }
     }
   }
 </script>
@@ -50,7 +123,6 @@
   max-width: 50rem;
   height: 50rem;
   margin: 0 auto;
-  background-color: #E85E5B;
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
@@ -59,7 +131,6 @@
 .canvas__inner-circle {
   max-width: 48rem;
   height: 48rem;
-  background-color: #E85E5B;
   border: 2px solid #fff;
   position: relative;
   top: 50%;
@@ -130,7 +201,6 @@
   margin-top: 2rem;
 }
 .canvas__button {
-  background-color: #000;
   color: #fff;
   padding: 1.5rem 2rem;
   width: 100%;

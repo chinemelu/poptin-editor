@@ -2,8 +2,9 @@
   <div
     draggable
     @dragstart.self="onDrag"
-    @dragover.prevent
-    @dragenter.prevent
+    @dragover.prevent="$emit('dragover')"
+    @dragenter.prevent="$emit('dragenter')"
+    class="draggable"
   >
     <slot/>
   </div>
@@ -14,19 +15,22 @@
     props: {
       transferData: {
         type: Object,
-        required: true
+        required: true,
+        default: () => ({})
       }
     },
     methods: {
       onDrag(e) {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.dropEffect = 'move';
-        e.dataTransfer.setData('payload', JSON.stringify(this.transferData))
+        this.$emit('dragStart')
       }
     },
   }
 </script>
 
-<style lang="scss" scoped>
-
+<style scoped>
+.draggable {
+  cursor: move
+}
 </style>

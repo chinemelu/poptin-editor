@@ -14,11 +14,11 @@
           <p class="fs-14 text-muted ml-1">{{ content.unit }}</p>
         </div>
         <div class="accordion__colour-container" v-if="content.type === 'COLOUR'">
-          <div class="d-flex align-items-center justify-content-between border accordion__colour-container"> 
+          <div class="d-flex align-items-center justify-content-between border accordion__colour-container rounded"> 
             <div class="accordion__colour-palette" :style="{ backgroundColor: content.value }">
 
             </div>
-            <BaseInput class="accordion__colour-value" @input="handleColourChange" :value="content.value">
+            <BaseInput class="accordion__colour-value" @input="(newColor) => handleColourChange({ indexOfContentChanged: index, content, newColor })" :value="content.value">
             </BaseInput>
           </div>
         </div>
@@ -37,7 +37,9 @@
           {
             title: '',
             type: '',
-            value: ''
+            value: '',
+            unit: '',
+            component: ''
           }
         ])
       }
@@ -46,8 +48,10 @@
       BaseInput
     },
     methods: {
-      handleColourChange() {
-
+      handleColourChange({ indexOfContentChanged, content, newColor }) {
+        content.value = newColor
+        this.$emit('updateOptions', { indexOfContentChanged, content })
+        this.$emit('background-color-property-changed', content)
       }
     }
   }

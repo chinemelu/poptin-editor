@@ -2,21 +2,34 @@
   <div class="app">
     <div class="app__container">
       <main class="app__main">
-          <Canvas />
+          <Canvas 
+            :canvasBackgroundColor="canvasBackgroundColor"
+            :buttonBackgroundColor="buttonBackgroundColor"
+          />
       </main>
       <aside class="app__sidenav">
         <div class="app__sidenav-btn-container d-flex align-items-center justify-content-between">
-          <BaseButton buttonClass="app__sidenav-btn app__sidenav-btn--save">
+          <BaseButton 
+            buttonClass="app__sidenav-btn app__sidenav-btn--save" 
+            buttonBackgroundColor="#1949d8"
+            buttonTextColor="#fff"
+          >
             Save
           </BaseButton> 
 
-          <BaseButton buttonClass="app__sidenav-btn app__sidenav-btn--preview">
+          <BaseButton 
+            buttonClass="app__sidenav-btn app__sidenav-btn--preview" 
+            buttonBackgroundColor="#7B757D"
+            buttonTextColor="#fff"
+          >
             Preview
           </BaseButton> 
         </div>
 
         <div class="app__accordion-container">
-          <Accordions />
+          <Accordions 
+            @background-color-property-changed="handleBackgroundColourChange" 
+          />
         </div>
       </aside>
     </div>
@@ -34,6 +47,22 @@ export default {
     Accordions,
     BaseButton
   },
+  data() {
+    return {
+      canvasBackgroundColor: '#E85E5B',
+      buttonBackgroundColor: '#000'
+    }
+  },
+  methods: {
+    handleBackgroundColourChange(content) {
+      if (content.component === 'canvas') {
+        this.canvasBackgroundColor = content.value
+      }
+      if (content.component === 'button') {
+        this.buttonBackgroundColor = content.value
+      }
+    }
+  }
 }
 </script>
 
@@ -104,7 +133,7 @@ input[type=number] {
 }
 
 .bg-white {
-  background-color: #fff !important;
+  background-color: #1949d8 !important;
 }
 
 .bg-secondary {
@@ -114,6 +143,10 @@ input[type=number] {
 .border {
   border: 1px solid !important;
   color: inherit;
+}
+
+.cursor-move {
+  cursor: move !important;
 }
 
 .rounded {
@@ -148,12 +181,10 @@ input[type=number] {
 }
 
 .app__sidenav-btn--save {
-  background-color: #327AB7;
   color: #fff;
 }
 
 .app__sidenav-btn--preview {
-  background-color: #7B757D;
   color: #fff;
 }
 
