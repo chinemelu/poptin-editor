@@ -7,14 +7,17 @@
             :buttonBackgroundColor="buttonBackgroundColor"
             :isCanvasEditable="isCanvasEditable"
             @canvas-is-updated="updateCanvas"
+            ref="canvasChild"
             @cursor-position-changed="setCursorPosition"
             @is-cursor-in-canvas="setIsCursorInCanvas"
+            @outer-circle-ref="setOuterCircleRef"
           />
       </main>
       <aside class="app__sidenav">
         <div class="app__sidenav-btn-container d-flex align-items-center justify-content-between">
           <BaseButton 
             buttonClass="app__sidenav-btn app__sidenav-btn--save" 
+            @click="saveToLocalStorage"
           >
             Save
           </BaseButton> 
@@ -84,15 +87,27 @@
       ref="imageUpload"
       @change="handleImageUpload"
     />
+    <!-- Preview modal -->
     <BaseModal
       v-show="showModal"
       @close="showModal = false"
+      @modalRef="setModalRef"
     > 
     <template v-slot:modal-body>
       <div v-html="canvasHTML" class="modal-body">
 
       </div>
     </template>
+    </BaseModal>
+
+    <!-- Success message modal -->
+    <BaseModal v-show="showSuccessMessage"
+      @close="showSuccessMessage = false"
+      @modalRef="setModalRef"
+    >
+      <template v-slot:modal-body>
+        <p class="primary-green">You have successfully saved </p>
+      </template>
     </BaseModal>
   </div>
 </template>
@@ -112,6 +127,7 @@ export default {
   },
   mounted() {
     document.addEventListener('keydown', this.handleKeyPress)
+    document.addEventListener("selectionchange", this.handleSelectionChange, false);
   },
   data() {
     return {
@@ -125,10 +141,14 @@ export default {
         isTextActive: false,
         isInputActive: false
       },
+      modalRef: {},
       currentActiveState: '',
       cursorCoordinates: {},
       canvasHTML: '',
-      isCursorInCanvas: false
+      isCursorInCanvas: false,
+      savedRange: '',
+      outerCircleRef: {},
+      showSuccessMessage: false
     }
   },
   computed: {
@@ -139,6 +159,16 @@ export default {
     }
   },
   methods: {
+    setModalRef(ref) {
+      this.modalRef = ref
+    },
+    saveToLocalStorage() {
+      localStorage.setItem('canvasHTML', JSON.stringify(this.canvasHTML))
+      this.showSuccessMessage = true 
+    },
+    setOuterCircleRef(value) {
+      this.outerCircleRef = value
+    },
     setIsCursorInCanvas(value) {
       this.isCursorInCanvas = value
     },
@@ -161,15 +191,19 @@ export default {
       }
     },
     insertImageIntoDOM() {
-      var range = window.getSelection().getRangeAt(0);
       const element = document.createElement('img');
+      element.setAttribute("draggable", true)
+      element.setAttribute("height", '100px')
+      element.setAttribute("width", '100px')
       element.setAttribute("src", this.previewImage);
-      range.insertNode(element)
-      console.log('element', element);
+      element.addEventListener('dragover', this.$refs.canvasChild.onDragOver)
+      element.addEventListener('dragstart', this.$refs.canvasChild.onDrag)
+      this.outerCircleRef.appendChild(element)
     },
     handleKeyPress(e) {
-      if (e.key === "Escape" && this.showModal) {
+      if (e.key === "Escape" && (this.showModal || this.showSuccessMessage)) {
         this.showModal = false
+        this.showSuccessMessage = false
       }
     },
     updateCanvas(canvasHTML) {
@@ -189,22 +223,25 @@ export default {
       })
     },
     handleActiveStateToggle(state) {
-      this.currentActiveState = state
       if (this.currentActiveState !== state) {
         this.clearAllActiveStates()
       }
       this.activeStates[state] = !this.activeStates[state]
+      this.currentActiveState = state
     }
   },
   beforeDestroy() {
     document.removeEventListener('keydown', this.handleKeyPress)
+    document.removeEventListener("selectionchange", this.handleSelectionChange, false);
   },
   watch: {
     'activeStates.isImageActive' (newValue) {
-      if (newValue && !this.isCursorInCanvas) {
+      if (newValue) {
         this.openImageUploadDialog()
       }
-      if (newValue && this.isCursorInCanvas) {
+    },
+    isCursorInCanvas(newValue) {
+      if (newValue && this.activeStates.isImageActive) {
         this.insertImageIntoDOM()
       }
     }
@@ -244,6 +281,10 @@ input[type=number] {
 
 .d-none {
   display: none !important
+}
+
+.primary-green {
+  color: green;
 }
 
 .d-flex {

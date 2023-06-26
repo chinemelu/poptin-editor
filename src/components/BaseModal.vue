@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-backdrop" @click.self="closeModal">
+  <div class="modal-backdrop" @click.self="closeModal" ref="modal">
     <div class="modal">
 
       <header>
@@ -31,6 +31,9 @@
       closeModal() {
         this.$emit('close')
       }
+    },
+    mounted() {
+      this.$emit('modalRef', this.$refs.modal)
     }
   }
 </script>

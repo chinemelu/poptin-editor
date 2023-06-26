@@ -88,7 +88,7 @@
 
 <script>
   import BaseInput from '@/components/BaseInput'
-  import CanvasButton from './CanvasButton.vue'
+  import CanvasButton from '@/components/CanvasButton.vue'
  
   export default {
     components: {
@@ -105,7 +105,16 @@
         childList: true,
         subtree: true,
       });
-      this.canvasHTML = this.$refs.canvas.innerHTML
+      const canvasHTMLInLocalStorage = localStorage.getItem('canvasHTML')
+
+      if (canvasHTMLInLocalStorage) {
+        const canvasHTML = JSON.parse(canvasHTMLInLocalStorage)
+        this.showUpdatedHTMLCanvas = true
+        this.canvasHTML = canvasHTML
+      } else {
+        this.canvasHTML = this.$refs.canvas.innerHTML
+      }
+      this.$emit('outer-circle-ref', this.$refs.canvasOuterCircle)
     },
     data() {
       return {
@@ -114,10 +123,18 @@
         canvasHTML: '',
         observer: '',
         canvasOuterCircle: {},
-        isCursorInCanvas: false
+        isCursorInCanvas: false,
+        showUpdatedHTMLCanvas: false
+      }
+    },
+    computed: {
+      computedHTMLCanvas: function () {
+        return this.showUpdatedHTMLCanvas ? this.canvasHTML : ''
       }
     },
     beforeDestroy() {
+      this.canvasOuterCircle.removeEventListener('mousedown', this.findPositionOfCursor)
+      this.canvasOuterCircle.removeEventListener('blur', this.setIsCursorInCanvas(false))
       this.observer.disconnect()
     },
     props: {
