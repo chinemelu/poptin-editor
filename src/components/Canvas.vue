@@ -1,72 +1,84 @@
 <template>
-  <div class="canvas">
-    <div 
-      class="canvas__outer-circle" 
-      :style="{ backgroundColor: canvasBackgroundColor }"
-      @drop.stop="onDrop"
-      @dragover.prevent
-      @dragenter.prevent
+  <div class="canvas" :contenteditable="isCanvasEditable" ref="canvas"
+      @input="handleCanvasUpdate"
+      @change="handleCanvasUpdate"
     >
-      <div class="canvas__inner-circle" :style="{ backgroundColor: canvasBackgroundColor }">
-        <div class="canvas__star-container">
+    <div 
+      class="canvas__outer-circle"
+      ref="canvasOuterCircle"
+      :style="{ backgroundColor: canvasBackgroundColor }"
+    >
+      <div 
+        @dragover.prevent
+        class="canvas__inner-circle" 
+        :style="{ backgroundColor: canvasBackgroundColor }"
+      >
+        <div class="canvas__star-container"
+          ref="canvasInnerCircle"
+        >
           <span 
-            class="canvas__star canvas__star--sm cursor-move"
+            class="canvas__star canvas__star--sm cursor-move draggable"
             draggable
             @dragstart.self="onDrag"
-            @dragover.prevent
-            @dragenter.prevent
+            @dragover.prevent="onDragOver"
           >
           </span>
           <span 
-            class="canvas__star canvas__star--md cursor-move"
+            class="canvas__star canvas__star--md cursor-move draggable"
             draggable
             @dragstart.self="onDrag"
-            @dragover.prevent
-            @dragenter.prevent  
+            @dragover.prevent="onDragOver"
           >
           </span>
           <span 
-            class="canvas__star canvas__star--sm cursor-move"
+            class="canvas__star canvas__star--sm cursor-move draggable"
             draggable
             @dragstart.self="onDrag"
-            @dragover.prevent
-            @dragenter.prevent  
+            @dragover.prevent="onDragOver"
           >
           </span>
         </div>
         <div class="canvas__inner-circle-content">
           <div class="canvas__text-container">
-            <BaseDrop @drop="moveItemInCanvas">
-              <BaseDrag>
-                <p class="canvas__text">All the text and elements in this popup should be editable and dragable</p>
-              </BaseDrag>
-            </BaseDrop>
+            <p 
+              class="canvas__text" 
+              draggable
+              @dragstart.self="onDrag"
+              @dragover.prevent="onDragOver"
+              :contenteditable="isCanvasEditable"
+            >
+              All the text and elements in this popup should be editable and dragable
+            </p>
+     
           </div>
+              <BaseInput 
+                draggable
+                placeholder="E-mail" 
+                inputClass="canvas__input" 
+                @dragstart.self="onDrag"
+                @dragover.prevent="onDragOver"
+              />
 
-          <BaseDrop @drop="moveItemInCanvas">
-            <BaseDrag>
-              <BaseInput placeholder="E-mail" inputClass="canvas__input" />
-            </BaseDrag>
-          </BaseDrop>
-
-
-          <BaseDrop @drop="moveItemInCanvas">
-            <BaseDrag>
-              <BaseButton 
+              <CanvasButton 
+                draggable
+                @dragstart.self="onDrag"
+                @dragover.prevent="onDragOver"
                 buttonClass="canvas__button"
                 :buttonBackgroundColor="buttonBackgroundColor"
               >
                 signup now
-              </BaseButton>            
-            </BaseDrag>
-          </BaseDrop>
+              </CanvasButton>            
          
           <div class="canvas__text-container">
-            <BaseDrop @drop="moveItemInCanvas">
-              <BaseDrag>
-                <p class="canvas__mini-text">No credit card required. No surprises</p>         
-              </BaseDrag>
-            </BaseDrop>
+            <p 
+              class="canvas__mini-text"  
+              :contenteditable="isCanvasEditable"
+              draggable
+              @dragstart.self="onDrag"
+              @dragover.prevent="onDragOver"
+            >
+              No credit card required. No surprises
+            </p>         
           </div>
         </div>
       </div>
@@ -76,17 +88,43 @@
 
 <script>
   import BaseInput from '@/components/BaseInput'
-  import BaseButton from '@/components/BaseButton'
-  import BaseDrag from '@/components/BaseDrag.vue';
-  import BaseDrop from '@/components//BaseDrop.vue';
+  import CanvasButton from './CanvasButton.vue'
+ 
   export default {
     components: {
       BaseInput,
-      BaseButton,
-      BaseDrag,
-      BaseDrop
+      CanvasButton
+    },
+    mounted() {
+      this.canvasOuterCircle =this.$refs.canvasOuterCircle
+      this.canvasOuterCircle.addEventListener('mousedown', this.findPositionOfCursor)
+      this.canvasOuterCircle.addEventListener('blur', this.setIsCursorInCanvas(false))
+
+      this.observer = new MutationObserver(this.mutationObserverCallback);
+      this.observer.observe(this.$refs.canvas, {    
+        childList: true,
+        subtree: true,
+      });
+      this.canvasHTML = this.$refs.canvas.innerHTML
+    },
+    data() {
+      return {
+        elementBeingDragged: {},
+        elementBeingDraggedOver: {},
+        canvasHTML: '',
+        observer: '',
+        canvasOuterCircle: {},
+        isCursorInCanvas: false
+      }
+    },
+    beforeDestroy() {
+      this.observer.disconnect()
     },
     props: {
+      isCanvasEditable: {
+        type: Boolean,
+        default: false
+      },
       buttonBackgroundColor: {
         type: String,
         default: '#000'
@@ -97,14 +135,64 @@
       }
     },
     methods: {
-      onDrag() {
-
+      setIsCursorInCanvas(value) {
+        this.isCursorInCanvas = value
       },
-      moveItemInCanvas() {
+      findPositionOfCursor(e) {
+        const canvas = this.$refs.canvas
+        const xpositionOfCursorInWindow = e.clientX
+        const ypositionOfCursorInWindow = e.clientY
+        const canvasBox = canvas.getBoundingClientRect()
+        const leftPositionOfCanvas = canvasBox.left
+        const topPositionOfCanvas = canvasBox.top
+        const xPositionInCanvas = xpositionOfCursorInWindow - leftPositionOfCanvas
+        const ypositionInCanvas = ypositionOfCursorInWindow - topPositionOfCanvas
 
+        if (this.isCanvasEditable) {
+          this.setIsCursorInCanvas(true)
+          this.$emit('cursor-position-changed', { x: xPositionInCanvas, y: ypositionInCanvas })
+        }
       },
-      onDrop() {
-        
+      mutationObserverCallback(mutationList) {
+        mutationList.forEach(mutation => {
+          if (mutation.type === "childList") {
+            this.canvasHTML = this.$refs.canvas.innerHTML
+          }
+        })
+      },
+      handleCanvasUpdate(e) {
+        const canvasHTML = e.target.innerHTML
+        this.canvasHTML = canvasHTML
+      },
+      getPositionOfYCursor(e) {
+        this.positionOfYCursor = e.clientY
+      },
+      onDrag(e) {
+        this.elementBeingDragged = e.target
+      },
+      onDragOver(e) {
+        this.getPositionOfYCursor(e)
+        const elementBeingDraggedOver = e.target
+        const box = elementBeingDraggedOver.getBoundingClientRect()
+        const offset = this.positionOfYCursor - (box.top + (box.height/2))
+        const parentOfElementBeingDraggedOver = elementBeingDraggedOver.parentNode
+        if (offset < 0) {
+          parentOfElementBeingDraggedOver.insertBefore(this.elementBeingDragged, elementBeingDraggedOver)
+        } 
+      }
+    },
+    watch: {
+      canvasHTML: {
+        handler(newValue) {
+          // this is to update the initial html of the modal
+          this.$nextTick(() => {
+            this.$emit('canvas-is-updated', newValue)
+          })
+        },
+        immediate: true
+      },
+      isCursorInCanvas(newValue) {
+        this.$emit('is-cursor-in-canvas', newValue)
       }
     }
   }

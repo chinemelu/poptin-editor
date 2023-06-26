@@ -4,6 +4,10 @@
       v-on="$listeners"
       class="button"
       :class="buttonClass"
+      :style="{ 
+        backgroundColor: buttonBackgroundColor, 
+        color: buttonTextColor 
+      }"
       v-bind="$attrs"
     >
       <slot />
@@ -18,6 +22,14 @@ export default {
   props: {
     buttonClass: {
       type: String
+    },
+    buttonBackgroundColor: {
+      type: String,
+      default: '#000'
+    },
+    buttonTextColor: {
+      type: String,
+      default: '#fff'
     }
   }
 }
