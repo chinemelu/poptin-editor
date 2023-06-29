@@ -104,6 +104,7 @@
       this.observer.observe(this.$refs.canvas, {    
         childList: true,
         subtree: true,
+        attributes: true
       });
       const canvasHTMLInLocalStorage = localStorage.getItem('canvasHTML')
 
@@ -171,10 +172,8 @@
         }
       },
       mutationObserverCallback(mutationList) {
-        mutationList.forEach(mutation => {
-          if (mutation.type === "childList") {
-            this.canvasHTML = this.$refs.canvas.innerHTML
-          }
+        mutationList.forEach(() => {
+          this.canvasHTML = this.$refs.canvas.innerHTML
         })
       },
       handleCanvasUpdate(e) {
