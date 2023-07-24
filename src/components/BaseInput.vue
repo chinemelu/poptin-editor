@@ -8,7 +8,6 @@
       @input="updateValue"
       v-bind="$attrs"
       v-on="listeners"
-      :placeholder="placeholder"
     />
   </div>
 </template>
@@ -24,9 +23,6 @@ export default {
     },
     value: {
       type: [String, Number]
-    },
-    placeholder: {
-      type: String
     },
     inputClass: {
       type: String,

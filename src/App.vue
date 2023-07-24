@@ -113,7 +113,8 @@
 </template>
 
 <script>
-import Canvas from '@/components/Canvas'
+import Canvas from '@/components/Dynamic.vue'
+// import Canvas from '@/components/Canvas'
 import Accordions from '@/components/Accordions.vue';
 import BaseButton from '@/components/BaseButton.vue';
 import BaseModal from '@/components/BaseModal.vue';

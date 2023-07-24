@@ -95,7 +95,8 @@
       BaseInput,
       CanvasButton
     },
-    mounted() {
+    async mounted() {
+      // console.log('OPTIONS TEMPLATE', localStorage.setItem('yoo', this.$refs.canvas));
       this.canvasOuterCircle =this.$refs.canvasOuterCircle
       this.canvasOuterCircle.addEventListener('mousedown', this.findPositionOfCursor)
       this.canvasOuterCircle.addEventListener('blur', this.setIsCursorInCanvas(false))
@@ -112,6 +113,7 @@
         const canvasHTML = JSON.parse(canvasHTMLInLocalStorage)
         this.showUpdatedHTMLCanvas = true
         this.canvasHTML = canvasHTML
+        this.$options.template = canvasHTML
       } else {
         this.canvasHTML = this.$refs.canvas.innerHTML
       }
@@ -174,6 +176,7 @@
       mutationObserverCallback(mutationList) {
         mutationList.forEach(() => {
           this.canvasHTML = this.$refs.canvas.innerHTML
+          console.log('this', this.$refs.canvas.innerHTML);
         })
       },
       handleCanvasUpdate(e) {
